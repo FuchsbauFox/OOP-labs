@@ -6,25 +6,40 @@ namespace Isu.Services
 {
     public class CourseNumber
     {
-        public CourseNumber(int numberCourse)
+        private readonly List<Group> _groups;
+
+        public CourseNumber(string groupName)
         {
-            Course = numberCourse;
-            Groups = new List<Group>();
+            Course = CheckCourseNumber(groupName);
+            _groups = new List<Group>();
+            GroupsOfCourse = _groups.AsReadOnly();
         }
 
-        public List<Group> Groups { get; }
         public int Course { get; }
+        public IList<Group> GroupsOfCourse { get; }
 
         public Group AddGroup(string name)
         {
             CheckGroupOnExist(name);
-            Groups.Add(new Group(name));
-            return Groups.Last();
+            _groups.Add(new Group(name));
+            return _groups.Last();
+        }
+
+        private static int CheckCourseNumber(string groupName)
+        {
+            if (!int.TryParse(groupName[2].ToString(), out int courseNumber)
+                || courseNumber < 1
+                || courseNumber > 4)
+            {
+                throw new InvalidGroupNameExeption();
+            }
+
+            return courseNumber;
         }
 
         private void CheckGroupOnExist(string name)
         {
-            if (Groups.Any(@group => @group.GroupName == name))
+            if (_groups.Any(@group => @group.GroupName == name))
             {
                 throw new GroupAlreadyExistExeption();
             }

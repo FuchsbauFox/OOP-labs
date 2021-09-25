@@ -8,27 +8,35 @@ namespace Isu.Services
 {
     public class Group
     {
+        private readonly List<Student> _students;
         public Group(string name)
         {
             CheckGroupName(name);
 
             GroupName = name;
-            Students = new List<Student>();
+            _students = new List<Student>();
+            StudentsOfGroup = _students.AsReadOnly();
         }
 
-        public List<Student> Students { get; }
         public string GroupName { get; }
+        public IList<Student> StudentsOfGroup { get; }
 
         public Student AddStudent(string name, int id)
         {
-            return AddStudent(new Student(name, id));
+            return AddStudent(new Student(name, id, this));
         }
 
         public Student AddStudent(Student student)
         {
             CheckOnMaxStudentsInGroup();
-            Students.Add(student);
-            return Students.Last();
+            _students.Add(student);
+            student.CheckAndChangeStudentGroup(this);
+            return _students.Last();
+        }
+
+        public void RemoveStudent(Student student)
+        {
+            _students.Remove(student);
         }
 
         private static void CheckGroupName(string name)
@@ -41,7 +49,7 @@ namespace Isu.Services
 
         private void CheckOnMaxStudentsInGroup()
         {
-            if (Students.Count == 22)
+            if (_students.Count == 22)
             {
                 throw new MaxStudentInGroupExeption();
             }

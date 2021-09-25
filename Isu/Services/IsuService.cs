@@ -13,25 +13,18 @@ namespace Isu.Services
         public IsuService()
         {
             _idLastStudent = 0;
-            _courses = new List<CourseNumber>
-                {
-                    new CourseNumber(1),
-                    new CourseNumber(2),
-                    new CourseNumber(3),
-                    new CourseNumber(4),
-                };
+            _courses = new List<CourseNumber>();
         }
 
         public Group AddGroup(string name)
         {
-            if (!int.TryParse(name[2].ToString(), out int courseNumber)
-                || courseNumber < 1
-                || courseNumber > 4)
+            foreach (CourseNumber course in _courses.Where(course => course.Course == name[2] - '0'))
             {
-                throw new InvalidGroupNameExeption();
+                return course.AddGroup(name);
             }
 
-            return _courses[courseNumber - 1].AddGroup(name);
+            _courses.Add(new CourseNumber(name));
+            return _courses.Last().AddGroup(name);
         }
 
         public Student AddStudent(Group group, string name)
@@ -46,18 +39,24 @@ namespace Isu.Services
                 throw new InvalidIdStudentExeption();
             }
 
-            return (from course in _courses
-                    from @group in course.Groups
-                    from student in @group.Students
-                    select student)
-                .FirstOrDefault(student => student.IdStudent == id);
+            foreach (Student student in
+                from course in _courses
+                from @group in course.GroupsOfCourse.ToList()
+                from student in @group.StudentsOfGroup.ToList()
+                where student.IdStudent == id
+                select student)
+            {
+                return student;
+            }
+
+            throw new StudentNotFoundExeption();
         }
 
         public Student FindStudent(string name)
         {
             return (from course in _courses
-                from @group in course.Groups
-                from student in @group.Students
+                from @group in course.GroupsOfCourse.ToList()
+                from student in @group.StudentsOfGroup.ToList()
                 select student)
                 .FirstOrDefault(student => student.NameStudent == name);
         }
@@ -65,45 +64,36 @@ namespace Isu.Services
         public List<Student> FindStudents(string groupName)
         {
             return (from course in _courses
-                from @group in course.Groups
+                from @group in course.GroupsOfCourse.ToList()
                 where @group.GroupName == groupName
-                from student in @group.Students
+                from student in @group.StudentsOfGroup.ToList()
                 select student).ToList();
         }
 
         public List<Student> FindStudents(CourseNumber courseNumber)
         {
-            return (from @group in courseNumber.Groups
-                from student in @group.Students
+            return (from @group in courseNumber.GroupsOfCourse.ToList()
+                from student in @group.StudentsOfGroup.ToList()
                 select student).ToList();
         }
 
         public Group FindGroup(string groupName)
         {
             return (from course in _courses
-                    from @group in course.Groups
+                    from @group in course.GroupsOfCourse.ToList()
                     select @group)
                 .FirstOrDefault(@group => @group.GroupName == groupName);
         }
 
         public List<Group> FindGroups(CourseNumber courseNumber)
         {
-            return courseNumber.Groups;
+            return courseNumber.GroupsOfCourse.ToList();
         }
 
         public void ChangeStudentGroup(Student student, Group newGroup)
         {
-            foreach (Group @group in
-                from course in _courses
-                from @group in course.Groups
-                from findStudent in @group.Students
-                where findStudent == student
-                select @group)
-            {
-                newGroup.AddStudent(student);
-                @group.Students.Remove(student);
-                break;
-            }
+            student.StudentGroup.RemoveStudent(student);
+            newGroup.AddStudent(student);
         }
     }
 }

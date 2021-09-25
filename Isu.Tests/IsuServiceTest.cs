@@ -74,7 +74,7 @@ namespace Isu.Tests
             Assert.Catch<IsuException>(() =>
             {
                 _isuService = new IsuService();
-                Group invalidGroup = _isuService.AddGroup("M2204");
+                Group invalidGroup = _isuService.AddGroup("M3004");
             });
         }
 

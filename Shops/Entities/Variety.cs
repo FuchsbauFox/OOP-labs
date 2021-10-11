@@ -1,11 +1,11 @@
 ﻿using System;
 using Shops.Tools;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
     internal class Variety
     {
-        internal Variety(Product product, int quantity, int price)
+        internal Variety(Product product, int quantity, float price)
         {
             CheckQuantity(quantity);
             CheckPrice(price);
@@ -19,7 +19,7 @@ namespace Shops.Services
         internal int Id { get; }
         internal int Quantity { get; private set; }
         internal int QuantityTaken { get; private set; }
-        internal int Price { get; private set; }
+        internal float Price { get; private set; }
 
         internal void Delivery(int deliveryQuantity)
         {
@@ -28,7 +28,7 @@ namespace Shops.Services
             Quantity += deliveryQuantity;
         }
 
-        internal void ChangePrice(int newPrice)
+        internal void ChangePrice(float newPrice)
         {
             CheckPrice(newPrice);
 
@@ -43,10 +43,8 @@ namespace Shops.Services
             QuantityTaken = taken;
         }
 
-        internal void Buy(int buy)
+        internal void BuySuccessful()
         {
-            CheckBuyAndTake(buy);
-
             Quantity -= QuantityTaken;
             QuantityTaken = 0;
         }
@@ -59,7 +57,7 @@ namespace Shops.Services
             }
         }
 
-        private static void CheckPrice(int price)
+        private static void CheckPrice(float price)
         {
             if (price <= 0)
             {
@@ -70,14 +68,6 @@ namespace Shops.Services
         private void CheckTakenPossible(int taken)
         {
             if (taken > Quantity)
-            {
-                throw new BuyNotPossibleException();
-            }
-        }
-
-        private void CheckBuyAndTake(int buy)
-        {
-            if (buy != QuantityTaken)
             {
                 throw new BuyNotPossibleException();
             }

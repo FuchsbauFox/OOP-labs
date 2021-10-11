@@ -1,13 +1,13 @@
-﻿using Shops.Services;
+﻿using System.Linq;
 using Shops.Tools;
 
-namespace Shops.Persons
+namespace Shops.Entities
 {
     public class Customer
     {
-        private int _money;
+        private float _money;
 
-        public Customer(int money = 1000)
+        public Customer(float money = 1000)
         {
             Shopping = new Shopping();
             _money = money;
@@ -17,7 +17,7 @@ namespace Shops.Persons
 
         public void Pay()
         {
-            int cost = Shopping.CalculateCost();
+            float cost = Shopping.CalculateCost();
             CheckCostCart(cost);
             CheckForSolvency(cost);
             Shopping.MakeBuy();
@@ -26,7 +26,7 @@ namespace Shops.Persons
             Shopping = new Shopping();
         }
 
-        private void CheckCostCart(int cost)
+        private static void CheckCostCart(float cost)
         {
             if (cost == 0)
             {
@@ -34,7 +34,7 @@ namespace Shops.Persons
             }
         }
 
-        private void CheckForSolvency(int cost)
+        private void CheckForSolvency(float cost)
         {
             if (cost > _money)
             {

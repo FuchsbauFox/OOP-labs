@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
-    public class ItemShoppingList
+    public class ListItem
     {
-        public ItemShoppingList(Product product, int quantity)
+        public ListItem(Product product, int quantity)
         {
             CheckQuantity(quantity);
 

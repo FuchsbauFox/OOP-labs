@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
-    internal class ItemShoppingCart
+    internal class CartItem
     {
-        internal ItemShoppingCart(Shop shop, Variety product, int quantityProduct)
+        internal CartItem(Shop shop, Variety product, int quantityProduct)
         {
             CheckQuantity(quantityProduct);
 

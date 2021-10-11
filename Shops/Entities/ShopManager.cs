@@ -2,7 +2,7 @@
 using System.Linq;
 using Shops.Tools;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
     public class ShopManager
     {
@@ -23,7 +23,7 @@ namespace Shops.Services
             CheckShopOnExist(shop);
 
             _shops.Add(shop);
-            return _shops.Last();
+            return shop;
         }
 
         public Product AddProduct(string productName)
@@ -32,10 +32,10 @@ namespace Shops.Services
             CheckProductOnExist(product);
 
             _catalogProducts.Add(product);
-            return _catalogProducts.Last();
+            return product;
         }
 
-        public void DeliverGoodsInShop(Shop shop, Product product, int quantity, int price = 0)
+        public void DeliverGoodsInShop(Shop shop, Product product, int quantity, float price = 0)
         {
             CheckShopOnExist(shop, true);
             CheckProductOnExist(product, true);
@@ -53,7 +53,7 @@ namespace Shops.Services
 
         public void CreatCart(Shopping shopping)
         {
-            foreach (ItemShoppingList item in shopping.ListOfShopping)
+            foreach (ListItem item in shopping.ListOfShopping)
             {
                 CheckProductOnExist(item.Product, true);
 
@@ -98,39 +98,27 @@ namespace Shops.Services
             }
         }
 
-        private void CheckProductOnExist(Product verifiableProduct, bool productShouldExist = false)
+        private void CheckProductOnExist(Product verifiableProduct, bool shouldExist = false)
         {
-            if (_catalogProducts.Any(product => product.Name == verifiableProduct.Name))
+            bool productExist = _catalogProducts.Any(product => product.Name == verifiableProduct.Name);
+            switch (shouldExist)
             {
-                if (!productShouldExist)
-                {
+                case false when productExist:
                     throw new ProductAlreadyExistException();
-                }
-            }
-            else
-            {
-                if (productShouldExist)
-                {
+                case true when !productExist:
                     throw new ProductNotExistException();
-                }
             }
         }
 
-        private void CheckShopOnExist(Shop verifiableShop, bool shopShouldExist = false)
+        private void CheckShopOnExist(Shop verifiableShop, bool shouldExist = false)
         {
-            if (_shops.Any(shop => shop.ShopName == verifiableShop.ShopName))
+            bool shopExist = _shops.Any(shop => shop.ShopName == verifiableShop.ShopName);
+            switch (shouldExist)
             {
-                if (!shopShouldExist)
-                {
+                case false when shopExist:
                     throw new ShopAlreadyExistException();
-                }
-            }
-            else
-            {
-                if (shopShouldExist)
-                {
+                case true when !shopExist:
                     throw new ShopNotExistException();
-                }
             }
         }
     }

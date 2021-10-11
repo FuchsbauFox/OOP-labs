@@ -1,5 +1,5 @@
 ﻿using System;
-using Shops.Services;
+using Shops.Entities;
 
 namespace Shops
 {

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Shops.Tools;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
     public class Shop
     {
         private readonly List<Variety> _varietiesProduct;
-        private int _cashbox;
+        private float _cashbox;
 
         public Shop(string shopName)
         {
@@ -23,7 +23,7 @@ namespace Shops.Services
         public string ShopName { get; }
         internal IReadOnlyList<Variety> VarietiesProductOfShop { get; }
 
-        internal void DeliveryProduct(Product product, int quantity, int price)
+        internal void DeliveryProduct(Product product, int quantity, float price)
         {
             Variety variety = FindVariety(product.Id);
             if (variety == null)
@@ -37,23 +37,18 @@ namespace Shops.Services
             }
         }
 
-        internal void ChangePrice(Product product, int newPrice)
+        internal void ChangePrice(Product product, float newPrice)
         {
             Variety variety = FindVariety(product.Id);
-            if (variety == null)
-            {
-                throw new ProductNotExistException();
-            }
-            else
-            {
-                variety.ChangePrice(newPrice);
-            }
+            CheckVariety(product);
+
+            variety.ChangePrice(newPrice);
         }
 
-        internal void BuyProducts(Variety variety, int quantity)
+        internal void BuyProducts(Variety variety)
         {
-            _cashbox += variety.Price * quantity;
-            variety.Buy(quantity);
+            _cashbox += variety.Price * variety.QuantityTaken;
+            variety.BuySuccessful();
         }
 
         private static void CheckShopName(string shopName)
@@ -61,6 +56,14 @@ namespace Shops.Services
             if (shopName == null)
             {
                 throw new ArgumentNullException();
+            }
+        }
+
+        private static void CheckVariety(Product product)
+        {
+            if (product == null)
+            {
+                throw new ProductNotExistException();
             }
         }
 

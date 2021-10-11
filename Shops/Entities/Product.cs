@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shops.Services
+namespace Shops.Entities
 {
     public class Product
     {

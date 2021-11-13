@@ -39,16 +39,11 @@ namespace IsuExtra.Service
 
         public void RemoveStudentFromStream(Student student, Stream stream)
         {
-            foreach (Student groupStudent in stream.Group.StudentsOfGroup)
-            {
-                if (student.IdStudent == groupStudent.IdStudent &&
-                    student.NameStudent == groupStudent.NameStudent)
-                {
-                    student = groupStudent;
-                }
-            }
+            Student findStudent = stream.Group.StudentsOfGroup.FirstOrDefault(groupStudent =>
+                student.IdStudent == groupStudent.IdStudent &&
+                student.NameStudent == groupStudent.NameStudent);
 
-            stream.Group.RemoveStudent(student);
+            stream.Group.RemoveStudent(findStudent);
         }
 
         public List<Stream> FindStreams(CourseOgnp course)
@@ -67,13 +62,14 @@ namespace IsuExtra.Service
             List<Student> groupStudents = megaFaculty.IsuService.FindStudents(group.Group.GroupName);
 
             var subscribedStudents =
-                (from groupStudent in groupStudents
-                from faculty in _megaFaculties
-                from courseOgnp in faculty.CoursesOfMegaFaculty
-                from stream in courseOgnp.StreamsOfCourse
-                from student in stream.Group.StudentsOfGroup
-                where student.IdStudent == groupStudent.IdStudent && student.NameStudent == groupStudent.NameStudent
-                select groupStudent).ToList();
+                _megaFaculties.SelectMany(faculty => faculty.CoursesOfMegaFaculty)
+                    .SelectMany(course => course.StreamsOfCourse)
+                    .SelectMany(stream => stream.Group.StudentsOfGroup)
+                    .SelectMany(student => groupStudents, (student, groupStudent) => new { student, groupStudent })
+                    .Where(students =>
+                        students.student.IdStudent == students.groupStudent.IdStudent &&
+                        students.student.NameStudent == students.groupStudent.NameStudent)
+                    .Select(@t => @t.groupStudent).ToList();
 
             foreach (Student student in subscribedStudents)
             {
@@ -93,24 +89,26 @@ namespace IsuExtra.Service
 
         private MegaFaculty FindMegaFacultyByStudent(Student student)
         {
-            foreach (MegaFaculty megaFaculty in
-                _megaFaculties.Where(megaFaculty => megaFaculty.IsuService.FindStudent(student.NameStudent) != null))
+            MegaFaculty megaFaculty = _megaFaculties.FirstOrDefault(megaFaculty =>
+                megaFaculty.IsuService.FindStudent(student.NameStudent) != null);
+
+            if (megaFaculty == null)
             {
-                return megaFaculty;
+                throw new GroupNotFoundException();
             }
 
-            throw new StudentNotFoundExeption();
+            return megaFaculty;
         }
 
         private GroupWithTimetable FindGroupWithTimetable(Student student)
         {
-            foreach (GroupWithTimetable @group in
-                from megaFaculty in _megaFaculties
-                from @group in megaFaculty.GroupsOfMegaFaculty
-                from groupStudent in @group.Group.StudentsOfGroup
-                where student.IdStudent == groupStudent.IdStudent &&
-                      student.NameStudent == groupStudent.NameStudent
-                select @group)
+            foreach (GroupWithTimetable @group in _megaFaculties
+                .SelectMany(megaFaculty => megaFaculty.GroupsOfMegaFaculty)
+                .SelectMany(@group => @group.Group.StudentsOfGroup, (@group, studentInGroup) => new { @group, studentInGroup })
+                .Where(groupAndStudent =>
+                    student.IdStudent == groupAndStudent.studentInGroup.IdStudent &&
+                    student.NameStudent == groupAndStudent.studentInGroup.NameStudent)
+                .Select(groupAndStudent => groupAndStudent.@group))
             {
                 return @group;
             }
@@ -145,10 +143,10 @@ namespace IsuExtra.Service
                 .SelectMany(megaFaculty => megaFaculty.CoursesOfMegaFaculty)
                 .SelectMany(course => course.StreamsOfCourse)
                 .SelectMany(streamOfCourse => streamOfCourse.Group.StudentsOfGroup, (streamOfCourse, studentOfStream) => new { streamOfCourse, studentOfStream })
-                .Where(@t =>
-                    student.IdStudent == @t.studentOfStream.IdStudent &&
-                    student.NameStudent == @t.studentOfStream.NameStudent &&
-                    stream.Name != @t.streamOfCourse.Name)
+                .Where(streamAndStudent =>
+                    student.IdStudent == streamAndStudent.studentOfStream.IdStudent &&
+                    student.NameStudent == streamAndStudent.studentOfStream.NameStudent &&
+                    stream.Name != streamAndStudent.streamOfCourse.Name)
                 .Select(@t => @t.streamOfCourse))
             {
                 CheckTimetable(stream.Timetable, streamOfCourse.Timetable);

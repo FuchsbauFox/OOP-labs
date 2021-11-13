@@ -39,11 +39,11 @@ namespace IsuExtra.Service
             return IsuService.AddStudent(group.Group, name);
         }
 
-        public void AddPairInGroup(GroupWithTimetable @group, string name, string day, string time)
+        public void AddPairInGroup(GroupWithTimetable @group, string name, DateTime time)
         {
             CheckGroupOnExist(group);
 
-            group.AddPairInTimetable(name, day, time);
+            group.AddPairInTimetable(name, time);
         }
 
         public CourseOgnp AddCourseOgnp(string name)
@@ -62,11 +62,11 @@ namespace IsuExtra.Service
             return course.AddStream(nameStream);
         }
 
-        public void AddPairInStream(Stream stream, string name, string day, string time)
+        public void AddPairInStream(Stream stream, string name, DateTime time)
         {
             CheckStream(stream);
 
-            stream.AddPairInTimetable(name, day, time);
+            stream.AddPairInTimetable(name, time);
         }
 
         private void CheckName(string name)

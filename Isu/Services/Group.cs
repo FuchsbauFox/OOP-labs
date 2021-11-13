@@ -19,7 +19,7 @@ namespace Isu.Services
             StudentsOfGroup = _students.AsReadOnly();
         }
 
-        protected Group()
+        public Group()
         {
             GroupName = null;
             _students = new List<Student>();

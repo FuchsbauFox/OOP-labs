@@ -1,25 +1,28 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using Isu.Tools;
 using Group = Isu.Services.Group;
 
 namespace IsuExtra.Service
 {
-    public class Stream : Group
+    public class Stream
     {
         public Stream(string name)
         {
             CheckStreamName(name);
 
             Name = name;
+            Group = new Group();
             Timetable = new Timetable();
         }
 
         public string Name { get; }
         public Timetable Timetable { get; }
+        internal Group Group { get; }
 
-        public void AddPairInTimetable(string name, string day, string time)
+        internal void AddPairInTimetable(string name, DateTime time)
         {
-            Timetable.AddPair(name, day, time);
+            Timetable.AddPair(name, time);
         }
 
         private static void CheckStreamName(string name)

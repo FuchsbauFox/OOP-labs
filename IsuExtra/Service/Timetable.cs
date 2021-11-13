@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using IsuExtra.Tools;
 
@@ -6,26 +7,26 @@ namespace IsuExtra.Service
 {
     public class Timetable
     {
-        private readonly List<Pair> _pairs;
+        private readonly List<Lesson> _pairs;
 
         public Timetable()
         {
-            _pairs = new List<Pair>();
+            _pairs = new List<Lesson>();
         }
 
-        public IReadOnlyList<Pair> PairsOfTimetable => _pairs;
+        public IReadOnlyList<Lesson> PairsOfTimetable => _pairs;
 
-        public void AddPair(string name, string day, string time)
+        internal void AddPair(string name, DateTime time)
         {
-            var pair = new Pair(name, day, time);
+            var pair = new Lesson(name, time);
             CheckTimePair(pair);
 
             _pairs.Add(pair);
         }
 
-        private void CheckTimePair(Pair newPair)
+        private void CheckTimePair(Lesson newLesson)
         {
-            if (_pairs.Any(pair => pair.Time == newPair.Time && pair.Day == newPair.Day))
+            if (_pairs.Any(pair => pair.Time == newLesson.Time))
             {
                 throw new TimeAlreadyTakenException();
             }

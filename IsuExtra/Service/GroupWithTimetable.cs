@@ -1,4 +1,5 @@
-﻿using Isu.Services;
+﻿using System;
+using Isu.Services;
 
 namespace IsuExtra.Service
 {
@@ -10,12 +11,12 @@ namespace IsuExtra.Service
             Timetable = new Timetable();
         }
 
-        public Group Group { get; }
         public Timetable Timetable { get; }
+        internal Group Group { get; }
 
-        internal void AddPairInTimetable(string name, string day, string time)
+        internal void AddPairInTimetable(string name, DateTime time)
         {
-            Timetable.AddPair(name, day, time);
+            Timetable.AddPair(name, time);
         }
     }
 }

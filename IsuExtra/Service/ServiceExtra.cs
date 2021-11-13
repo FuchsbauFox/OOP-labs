@@ -34,12 +34,12 @@ namespace IsuExtra.Service
             CheckTimetable(group.Timetable, stream.Timetable);
             CheckStreamTimetable(student, stream);
 
-            stream.AddStudent(student.NameStudent, student.IdStudent);
+            stream.Group.AddStudent(student.NameStudent, student.IdStudent);
         }
 
         public void RemoveStudentFromStream(Student student, Stream stream)
         {
-            foreach (Student groupStudent in stream.StudentsOfGroup)
+            foreach (Student groupStudent in stream.Group.StudentsOfGroup)
             {
                 if (student.IdStudent == groupStudent.IdStudent &&
                     student.NameStudent == groupStudent.NameStudent)
@@ -48,7 +48,7 @@ namespace IsuExtra.Service
                 }
             }
 
-            stream.RemoveStudent(student);
+            stream.Group.RemoveStudent(student);
         }
 
         public List<Stream> FindStreams(CourseOgnp course)
@@ -58,7 +58,7 @@ namespace IsuExtra.Service
 
         public List<Student> FindStudents(Stream stream)
         {
-            return stream.StudentsOfGroup.ToList();
+            return stream.Group.StudentsOfGroup.ToList();
         }
 
         public List<Student> UnsubscribedStudents(GroupWithTimetable @group)
@@ -71,7 +71,7 @@ namespace IsuExtra.Service
                 from faculty in _megaFaculties
                 from courseOgnp in faculty.CoursesOfMegaFaculty
                 from stream in courseOgnp.StreamsOfCourse
-                from student in stream.StudentsOfGroup
+                from student in stream.Group.StudentsOfGroup
                 where student.IdStudent == groupStudent.IdStudent && student.NameStudent == groupStudent.NameStudent
                 select groupStudent).ToList();
 
@@ -130,10 +130,10 @@ namespace IsuExtra.Service
 
         private void CheckTimetable(Timetable timetable1, Timetable timetable2)
         {
-            if ((from pairGroup in timetable1.PairsOfTimetable
-                from pairStream in timetable2.PairsOfTimetable
-                where pairStream.Time == pairGroup.Time && pairStream.Day == pairGroup.Day
-                select pairGroup).Any())
+            if (timetable1.PairsOfTimetable
+                .SelectMany(pair1 => timetable2.PairsOfTimetable, (pair1, pair2) => new { pair1, pair2 })
+                .Where(pairs => pairs.pair1.Time == pairs.pair2.Time)
+                .Select(pairs => pairs.pair1).Any())
             {
                 throw new StusentCannotAddInThisStreamException();
             }
@@ -141,29 +141,31 @@ namespace IsuExtra.Service
 
         private void CheckStreamTimetable(Student student, Stream stream)
         {
-            foreach (Stream courseStream in
-                from megaFaculty in _megaFaculties
-                from course in megaFaculty.CoursesOfMegaFaculty
-                from courseStream in course.StreamsOfCourse
-                from streamStudent in courseStream.StudentsOfGroup
-                where student.IdStudent == streamStudent.IdStudent &&
-                student.NameStudent == streamStudent.NameStudent &&
-                stream.Name != courseStream.Name
-                select courseStream)
+            foreach (Stream streamOfCourse in _megaFaculties
+                .SelectMany(megaFaculty => megaFaculty.CoursesOfMegaFaculty)
+                .SelectMany(course => course.StreamsOfCourse)
+                .SelectMany(streamOfCourse => streamOfCourse.Group.StudentsOfGroup, (streamOfCourse, studentOfStream) => new { streamOfCourse, studentOfStream })
+                .Where(@t =>
+                    student.IdStudent == @t.studentOfStream.IdStudent &&
+                    student.NameStudent == @t.studentOfStream.NameStudent &&
+                    stream.Name != @t.streamOfCourse.Name)
+                .Select(@t => @t.streamOfCourse))
             {
-                CheckTimetable(stream.Timetable, courseStream.Timetable);
+                CheckTimetable(stream.Timetable, streamOfCourse.Timetable);
             }
         }
 
         private MegaFaculty FindMegaFacultyByGroup(Group @group)
         {
-            foreach (MegaFaculty megaFaculty in
-                _megaFaculties.Where(megaFaculty => megaFaculty.IsuService.FindGroup(@group.GroupName) != null))
+            MegaFaculty megaFaculty = _megaFaculties.FirstOrDefault(megaFaculty =>
+                megaFaculty.IsuService.FindGroup(@group.GroupName) != null);
+
+            if (megaFaculty == null)
             {
-                return megaFaculty;
+                throw new GroupNotFoundException();
             }
 
-            throw new GroupNotFoundException();
+            return megaFaculty;
         }
     }
 }

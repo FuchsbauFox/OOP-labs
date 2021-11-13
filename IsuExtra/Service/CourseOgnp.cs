@@ -29,7 +29,7 @@ namespace IsuExtra.Service
             return stream;
         }
 
-        private static void CheckName(string name)
+        private void CheckName(string name)
         {
             if (name == null)
             {

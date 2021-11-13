@@ -3,22 +3,19 @@ using System.Text.RegularExpressions;
 
 namespace IsuExtra.Service
 {
-    public class Pair
+    public class Lesson
     {
-        public Pair(string name, string day, string time)
+        public Lesson(string name, DateTime time)
         {
             CheckCoupleName(name);
-            CheckDay(day);
             CheckTime(time);
 
             Name = name;
-            Day = day;
             Time = time;
         }
 
         public string Name { get; }
-        public string Day { get; }
-        public string Time { get; }
+        public DateTime Time { get; }
 
         private static void CheckCoupleName(string name)
         {
@@ -28,19 +25,11 @@ namespace IsuExtra.Service
             }
         }
 
-        private static void CheckDay(string day)
+        private static void CheckTime(DateTime time)
         {
-            if (day == null)
+            if (time == null)
             {
                 throw new ArgumentNullException();
-            }
-        }
-
-        private static void CheckTime(string time)
-        {
-            if (!Regex.IsMatch(time, @"[0-9]\d{1}:[0-9]\d{1}$"))
-            {
-                throw new ArgumentException();
             }
         }
     }

@@ -7,7 +7,7 @@ namespace Backups.FileSystem.Impl
 {
     public class Directory : IDirectory
     {
-        private List<IStorageObject> _objects;
+        private readonly List<IStorageObject> _objects;
 
         public Directory(string name, bool isRoot = false)
         {
@@ -29,6 +29,8 @@ namespace Backups.FileSystem.Impl
 
         public void DeleteObject(IStorageObject obj)
         {
+            CheckThisDirectoryForDelete();
+
             _objects.Remove(obj);
         }
 
@@ -46,6 +48,14 @@ namespace Backups.FileSystem.Impl
             if (_objects.Any(obj => obj.Name == name))
             {
                 throw new ObjectWithThisNameAlreadyExistsException();
+            }
+        }
+
+        private void CheckThisDirectoryForDelete()
+        {
+            if (Name == "C:" || Name == "Backups")
+            {
+                throw new ObjectCannotBeDeleteException();
             }
         }
     }

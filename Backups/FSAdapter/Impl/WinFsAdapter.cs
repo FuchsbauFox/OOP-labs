@@ -1,39 +1,63 @@
-﻿namespace Backups.FSAdapter.Impl
+﻿using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+
+namespace Backups.FSAdapter.Impl
 {
     public class WinFsAdapter : IFsAdapter
     {
-        public void AddDirectory(string path, string name)
+        public void AddDirectory(string path)
         {
+            Directory.CreateDirectory(path);
         }
 
-        public void DeleteDirectory(string path, string name)
+        public void DeleteDirectory(string path)
         {
-            throw new System.NotImplementedException();
+            Directory.Delete(path, true);
         }
 
-        public void AddFile(string path, string name)
+        public void AddFile(string path)
         {
-            throw new System.NotImplementedException();
+            using (File.Create(path))
+            {
+            }
         }
 
-        public void DeleteFile(string path, string name)
+        public void DeleteFile(string path)
         {
-            throw new System.NotImplementedException();
+            File.Delete(path);
         }
 
-        public void CopyStorageObject(string path, string name, string newPath)
+        public void CopyFile(string sourceFileName, string destFileName)
         {
-            throw new System.NotImplementedException();
+            File.Copy(sourceFileName, destFileName);
         }
 
-        public void MoveStorageObject(string prevPath, string name, string newPath)
+        public void AddContentOnFile(string path, string content)
         {
-            throw new System.NotImplementedException();
+            var sw = new StreamWriter(path);
+            sw.WriteLine(content);
+            sw.Close();
         }
 
-        public void CreateArchive(string name)
+        public void CreateArchive(string dirName, string archiveName, List<string> filePaths, bool dirCanBeExist = false)
         {
-            throw new System.NotImplementedException();
+            string dirPath = "C:\\Temp";
+            Directory.CreateDirectory(dirPath);
+            foreach (string path in filePaths)
+            {
+                CopyFile(path, dirPath + "\\" + path[(path.LastIndexOf('\\') + 1) ..]);
+            }
+
+            Directory.CreateDirectory("C:\\Backups\\" + dirName);
+            ZipFile.CreateFromDirectory(dirPath, "C:\\Backups\\" + dirName + "\\" + archiveName);
+            Directory.Delete(dirPath, true);
+        }
+
+        public void ExtractArchive(string archivePath, string dirPath)
+        {
+            Directory.CreateDirectory(dirPath);
+            ZipFile.ExtractToDirectory(archivePath, dirPath);
         }
     }
 }

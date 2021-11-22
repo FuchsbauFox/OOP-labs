@@ -1,13 +1,16 @@
-﻿namespace Backups.FSAdapter
+﻿using System.Collections.Generic;
+
+namespace Backups.FSAdapter
 {
     public interface IFsAdapter
     {
-        void AddDirectory(string path, string name);
-        void DeleteDirectory(string path, string name);
-        void AddFile(string path, string name);
-        void DeleteFile(string path, string name);
-        void CopyStorageObject(string path, string name, string newPath);
-        void MoveStorageObject(string prevPath, string name, string newPath);
-        void CreateArchive(string name);
+        void AddDirectory(string path);
+        void DeleteDirectory(string path);
+        void AddFile(string path);
+        void DeleteFile(string path);
+        void CopyFile(string sourceFileName, string destFileName);
+        void AddContentOnFile(string path, string content);
+        void CreateArchive(string dirName, string archiveName, List<string> filePaths, bool dirCanBeExist = false);
+        void ExtractArchive(string archivePath, string dirPath);
     }
 }

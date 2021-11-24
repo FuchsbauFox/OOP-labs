@@ -102,18 +102,21 @@ namespace IsuExtra.Service
 
         private GroupWithTimetable FindGroupWithTimetable(Student student)
         {
-            foreach (GroupWithTimetable @group in _megaFaculties
+            GroupWithTimetable findGroup = _megaFaculties
                 .SelectMany(megaFaculty => megaFaculty.GroupsOfMegaFaculty)
-                .SelectMany(@group => @group.Group.StudentsOfGroup, (@group, studentInGroup) => new { @group, studentInGroup })
+                .SelectMany(@group => group.Group.StudentsOfGroup, (@group, studentInGroup) => new { @group, studentInGroup })
                 .Where(groupAndStudent =>
                     student.IdStudent == groupAndStudent.studentInGroup.IdStudent &&
                     student.NameStudent == groupAndStudent.studentInGroup.NameStudent)
-                .Select(groupAndStudent => groupAndStudent.@group))
+                .Select(groupAndStudent => groupAndStudent.@group)
+                .FirstOrDefault();
+
+            if (findGroup == null)
             {
-                return @group;
+                throw new GroupNotFoundException();
             }
 
-            throw new GroupNotFoundException();
+            return findGroup;
         }
 
         private void CheckCourse(MegaFaculty megaFaculty, Stream verifiableStream)
@@ -147,7 +150,7 @@ namespace IsuExtra.Service
                     student.IdStudent == streamAndStudent.studentOfStream.IdStudent &&
                     student.NameStudent == streamAndStudent.studentOfStream.NameStudent &&
                     stream.Name != streamAndStudent.streamOfCourse.Name)
-                .Select(@t => @t.streamOfCourse))
+                .Select(streamAndStudent => streamAndStudent.streamOfCourse))
             {
                 CheckTimetable(stream.Timetable, streamOfCourse.Timetable);
             }

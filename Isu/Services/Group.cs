@@ -9,11 +9,19 @@ namespace Isu.Services
     public class Group
     {
         private readonly List<Student> _students;
+
         public Group(string name)
         {
             CheckGroupName(name);
 
             GroupName = name;
+            _students = new List<Student>();
+            StudentsOfGroup = _students.AsReadOnly();
+        }
+
+        public Group()
+        {
+            GroupName = null;
             _students = new List<Student>();
             StudentsOfGroup = _students.AsReadOnly();
         }
@@ -41,7 +49,7 @@ namespace Isu.Services
 
         private static void CheckGroupName(string name)
         {
-            if (!Regex.IsMatch(name, @"^M+3+[1-4]\d{0}[0-9]\d{1}$"))
+            if (!Regex.IsMatch(name, @"^[A-Z][1-9]\d{0}[1-4]\d{0}[0-9]\d{1}$"))
             {
                 throw new InvalidGroupNameExeption();
             }

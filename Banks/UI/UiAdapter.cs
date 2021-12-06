@@ -7,6 +7,7 @@ using Banks.BankSystem.Impl.ClientBuilder;
 using Banks.BankSystem.Impl.InfoAccount;
 using Banks.MyDateTime;
 using Banks.Tools;
+using Banks.Tools.BankException;
 using Banks.Tools.UiException;
 using Spectre.Console;
 
@@ -47,6 +48,21 @@ namespace Banks.UI
             {
                 AnsiConsole.MarkupLine("[underline red]Error: " + exception.Message + "[/]");
             }
+        }
+
+        internal void SkipDay()
+        {
+            CurrentDate.GetInstance().SkipDay();
+        }
+
+        internal void SkipMonth()
+        {
+            CurrentDate.GetInstance().SkipMonth();
+        }
+
+        internal void SkipYear()
+        {
+            CurrentDate.GetInstance().SkipYear();
         }
 
         internal void ShowClients(Bank bank)
@@ -181,6 +197,46 @@ namespace Banks.UI
                         AnsiConsole.MarkupLine("[underline red]Error: account type unknown[/]");
                         break;
                 }
+            }
+            catch (Exception exception)
+            {
+                AnsiConsole.MarkupLine("[underline red]Error: " + exception.Message + "[/]");
+            }
+        }
+
+        internal void Attach(Bank bank)
+        {
+            try
+            {
+                AnsiConsole.Markup("[underline blue]Client fullname: [/]");
+                string fullName = Console.ReadLine();
+                AnsiConsole.Markup("[underline blue]Client password: [/]");
+                string password = Console.ReadLine();
+                Client client = bank.FindClient(fullName);
+                if (client == null)
+                    throw new ClientNotFoundException();
+                client.Login(password);
+                bank.Attach(client);
+            }
+            catch (Exception exception)
+            {
+                AnsiConsole.MarkupLine("[underline red]Error: " + exception.Message + "[/]");
+            }
+        }
+
+        internal void Detach(Bank bank)
+        {
+            try
+            {
+                AnsiConsole.Markup("[underline blue]Client fullname: [/]");
+                string fullName = Console.ReadLine();
+                AnsiConsole.Markup("[underline blue]Client password: [/]");
+                string password = Console.ReadLine();
+                Client client = bank.FindClient(fullName);
+                if (client == null)
+                    throw new ClientNotFoundException();
+                client.Login(password);
+                bank.Detach(client);
             }
             catch (Exception exception)
             {

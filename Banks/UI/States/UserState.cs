@@ -26,6 +26,13 @@ namespace Banks.UI.States
             }
 
             _client.Login(_password);
+
+            foreach (string notification in _client.Notifications)
+            {
+                AnsiConsole.MarkupLine("[yellow]" + notification + "[/]");
+            }
+
+            _client.ClearNotifications();
         }
 
         internal override void Start()

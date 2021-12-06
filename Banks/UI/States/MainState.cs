@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml;
 using Spectre.Console;
 
 namespace Banks.UI.States
@@ -17,6 +18,9 @@ namespace Banks.UI.States
                         .AddChoice("showBanks")
                         .AddChoice("manager")
                         .AddChoice("user")
+                        .AddChoice("skipDay")
+                        .AddChoice("skipMonth")
+                        .AddChoice("skipYear")
                         .AddChoice("exit"));
                 switch (command)
                 {
@@ -55,6 +59,15 @@ namespace Banks.UI.States
                     case "addBank":
                         UiAdapter.GetInstance().AddBank();
                         break;
+                    case "skipDay":
+                        UiAdapter.GetInstance().SkipDay();
+                        break;
+                    case "skipMonth":
+                        UiAdapter.GetInstance().SkipMonth();
+                        break;
+                    case "skipYear":
+                        UiAdapter.GetInstance().SkipYear();
+                        break;
                     case "exit":
                         return;
                 }
@@ -67,6 +80,9 @@ namespace Banks.UI.States
             AnsiConsole.WriteLine("showBanks - show registered banks");
             AnsiConsole.WriteLine("manager - login as manager");
             AnsiConsole.WriteLine("user - login as user");
+            AnsiConsole.WriteLine("skipDay - skip one day");
+            AnsiConsole.WriteLine("skipMonth - skip one month");
+            AnsiConsole.WriteLine("skipYear - skip one year");
             AnsiConsole.WriteLine("exit - finish work");
         }
     }

@@ -26,6 +26,8 @@ namespace Banks.UI.States
                         .AddChoice("makeAccount")
                         .AddChoice("showOffers")
                         .AddChoice("showClients")
+                        .AddChoice("attach")
+                        .AddChoice("detach")
                         .AddChoice("logout"));
                 switch (command)
                 {
@@ -41,6 +43,12 @@ namespace Banks.UI.States
                     case "addOffer":
                         UiAdapter.GetInstance().AddOffer(_bank);
                         break;
+                    case "attach":
+                        UiAdapter.GetInstance().Attach(_bank);
+                        break;
+                    case "detach":
+                        UiAdapter.GetInstance().Detach(_bank);
+                        break;
                     case "logout":
                         UiMain.TransitionTo(new MainState());
                         UiMain.Start();
@@ -55,6 +63,8 @@ namespace Banks.UI.States
             AnsiConsole.WriteLine("makeAccount - create or found client with account in the bank");
             AnsiConsole.WriteLine("showOffers - show offers at the bank");
             AnsiConsole.WriteLine("showClients - show clients at the bank");
+            AnsiConsole.WriteLine("attach - subscribe client for notifications of new accounts");
+            AnsiConsole.WriteLine("detach - unsubscribe client from notifications of new accounts");
             AnsiConsole.WriteLine("logout - return in main menu");
         }
     }

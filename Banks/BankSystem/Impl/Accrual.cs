@@ -24,12 +24,12 @@ namespace Banks.BankSystem.Impl
         {
             if (DaysCounter == 30)
             {
-                _account.Withdrawal(Savings, "Accrual");
+                _account.Replenishment(Savings, "Accrual");
                 DaysCounter = 0;
                 Savings = 0;
             }
 
-            float interest = _interests.Where(item => item.From < _account.Money).Select(item => item.Interest).Last();
+            float interest = _interests.Last(item => item.From < _account.Money).Interest;
             Savings += _account.Money * interest / 365;
             DaysCounter++;
         }

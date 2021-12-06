@@ -11,23 +11,26 @@ namespace Banks.BankSystem.Impl
     {
         private List<IAccount> _accounts;
         private string _password;
+        private List<string> _notifications;
 
         public Client()
         {
             _accounts = new List<IAccount>();
             _password = null;
+            _notifications = new List<string>();
             FullName = null;
             Passport = null;
             Address = null;
             PhoneNumber = null;
-            Notifications = new List<string>();
         }
 
         public string FullName { get; private set; }
         public string Passport { get; private set; }
         public string Address { get; private set; }
         public string PhoneNumber { get; private set; }
-        public List<string> Notifications { get; }
+
+        public IReadOnlyList<string> Notifications => _notifications;
+
         public IReadOnlyList<IAccount> Accounts => _accounts;
 
         public void Withrowal(string idMyAccount, float money)
@@ -65,13 +68,13 @@ namespace Banks.BankSystem.Impl
             switch (info)
             {
                 case InfoCreditAccount _ when _accounts.Any(account => account is CreditAccount):
-                    Notifications.Add("There is a new credit offer");
+                    _notifications.Add("There is a new credit offer");
                     break;
                 case InfoDebitAccount _ when _accounts.Any(account => account is DebitAccount):
-                    Notifications.Add("There is a new debit offer");
+                    _notifications.Add("There is a new debit offer");
                     break;
                 case InfoDepositAccount _ when _accounts.Any(account => account is DepositAccount):
-                    Notifications.Add("There is a new deposit offer");
+                    _notifications.Add("There is a new deposit offer");
                     break;
             }
         }
@@ -140,7 +143,12 @@ namespace Banks.BankSystem.Impl
             PhoneNumber = phoneNumber;
         }
 
-        internal void Login(string password)
+        public void ClearNotifications()
+        {
+            _notifications = new List<string>();
+        }
+
+        public void Login(string password)
         {
             if (password != _password) throw new IncorrectPassword();
         }

@@ -1,10 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Backups.Tools.FileSystemException;
+using Newtonsoft.Json;
 
 namespace Backups.FileSystem.Impl
 {
     public class File : IFile
     {
+        [JsonProperty]
         private byte[] _content;
 
         public File(string name)

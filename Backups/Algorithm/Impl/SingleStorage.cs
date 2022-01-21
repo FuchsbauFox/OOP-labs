@@ -2,11 +2,13 @@
 using Backups.Backups;
 using Backups.Backups.Impl;
 using Backups.FSAdapter;
+using Newtonsoft.Json;
 
 namespace Backups.Algorithm.Impl
 {
     public class SingleStorage : IAlgorithmStorage
     {
+        [JsonProperty]
         private readonly IFsAdapter _adapter;
         public SingleStorage(IFsAdapter adapter)
         {

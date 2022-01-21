@@ -2,11 +2,13 @@
 using Backups.Backups;
 using Backups.Backups.Impl;
 using Backups.FSAdapter;
+using Newtonsoft.Json;
 
 namespace Backups.Algorithm.Impl
 {
     public class SplitStorage : IAlgorithmStorage
     {
+        [JsonProperty]
         private readonly IFsAdapter _adapter;
         public SplitStorage(IFsAdapter adapter)
         {

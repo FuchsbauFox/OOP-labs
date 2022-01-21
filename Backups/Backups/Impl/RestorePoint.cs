@@ -1,26 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using Backups.MyDateTime;
+using Newtonsoft.Json;
 
 namespace Backups.Backups.Impl
 {
     public class RestorePoint : IRestorePoint
     {
-        private readonly List<string> _backupJobs;
-
-        public RestorePoint(string name, string algorithm, List<string> listBackupJobs)
+        public RestorePoint(string name, string algorithm, List<string> backupJobs)
         {
             CheckName(name);
 
-            Time = DateTime.Now;
+            Time = CurrentDate.GetInstance().Date;
             Name = name;
             Algorithm = algorithm;
-            _backupJobs = new List<string>(listBackupJobs);
+            BackupJobs = new List<string>(backupJobs);
         }
 
         public DateTime Time { get; }
         public string Name { get; }
         public string Algorithm { get; }
-        public IReadOnlyList<string> BackupJobs() => _backupJobs;
+        [JsonProperty]
+        protected List<string> BackupJobs { get; }
+        public IReadOnlyList<string> Jobs() => BackupJobs;
 
         private void CheckName(string name)
         {

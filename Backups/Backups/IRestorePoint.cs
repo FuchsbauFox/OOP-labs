@@ -8,6 +8,6 @@ namespace Backups.Backups
         DateTime Time { get; }
         string Name { get; }
         string Algorithm { get; }
-        IReadOnlyList<string> BackupJobs();
+        IReadOnlyList<string> Jobs();
     }
 }

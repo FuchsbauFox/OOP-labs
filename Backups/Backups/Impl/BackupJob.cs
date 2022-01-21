@@ -5,47 +5,51 @@ using Backups.Algorithm;
 using Backups.Algorithm.Impl;
 using Backups.FSAdapter;
 using Backups.Tools.BackupJobException;
+using Newtonsoft.Json;
 
 namespace Backups.Backups.Impl
 {
     public class BackupJob : IBackupJob
     {
-        private readonly IFsAdapter _adapter;
-        private readonly List<string> _jobObjects;
-        private readonly List<IRestorePoint> _restorePoints;
-        private IAlgorithmStorage _algorithmStorage;
-
         public BackupJob(IFsAdapter adapter)
         {
-            _adapter = adapter;
-            _jobObjects = new List<string>();
-            _restorePoints = new List<IRestorePoint>();
-            _algorithmStorage = null;
+            Adapter = adapter;
+            JobObjects = new List<string>();
+            RestorePoints = new List<IRestorePoint>();
+            AlgorithmStorage = null;
         }
 
-        public IReadOnlyList<string> JobObjects() => _jobObjects;
-        public IReadOnlyList<IRestorePoint> RestorePoints() => _restorePoints;
+        [JsonProperty]
+        protected IFsAdapter Adapter { get; }
+        [JsonProperty]
+        protected List<string> JobObjects { get; }
+        [JsonProperty]
+        protected List<IRestorePoint> RestorePoints { get; }
+        [JsonProperty]
+        protected IAlgorithmStorage AlgorithmStorage { get; set; }
+        public IReadOnlyList<string> Objects() => JobObjects;
+        public IReadOnlyList<IRestorePoint> Points() => RestorePoints;
 
         public void AddJobObject(string path)
         {
             CheckJobObject(path);
 
-            _jobObjects.Add(path);
+            JobObjects.Add(path);
         }
 
         public void RemoveJobObject(string path)
         {
             CheckJobObject(path, true);
 
-            _jobObjects.Remove(path);
+            JobObjects.Remove(path);
         }
 
         public void SetAlgorithmStorage(string algorithm)
         {
-            _algorithmStorage = algorithm switch
+            AlgorithmStorage = algorithm switch
             {
-                "split" => new SplitStorage(_adapter),
-                "single" => new SingleStorage(_adapter),
+                "split" => new SplitStorage(Adapter),
+                "single" => new SingleStorage(Adapter),
                 _ => throw new AlgorithmNotFoundException()
             };
         }
@@ -55,12 +59,12 @@ namespace Backups.Backups.Impl
             CheckAlgorithm();
             CheckRestorePoint(name);
 
-            _restorePoints.Add(_algorithmStorage.CreateRestorePoint(name, _jobObjects));
+            RestorePoints.Add(AlgorithmStorage.CreateRestorePoint(name, JobObjects));
         }
 
         private void CheckJobObject(string path, bool shouldExist = false)
         {
-            bool jobObjectExist = _jobObjects.Any(jobObject => jobObject == path);
+            bool jobObjectExist = JobObjects.Any(jobObject => jobObject == path);
             switch (shouldExist)
             {
                 case false when jobObjectExist:
@@ -72,7 +76,7 @@ namespace Backups.Backups.Impl
 
         private void CheckAlgorithm()
         {
-            if (_algorithmStorage == null)
+            if (AlgorithmStorage == null)
             {
                 throw new ArgumentNullException();
             }
@@ -80,7 +84,7 @@ namespace Backups.Backups.Impl
 
         private void CheckRestorePoint(string name)
         {
-            if (_restorePoints.Any(restorePoint => restorePoint.Name == name))
+            if (RestorePoints.Any(restorePoint => restorePoint.Name == name))
             {
                 throw new RestorePointWithThisNameAlreadyExistException();
             }

@@ -6,6 +6,10 @@ namespace Backups.FSAdapter.Impl
 {
     public class WinFsAdapter : IFsAdapter
     {
+        public WinFsAdapter()
+        {
+        }
+
         public void AddDirectory(string path)
         {
             Directory.CreateDirectory(path);

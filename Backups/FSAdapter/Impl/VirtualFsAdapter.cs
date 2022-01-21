@@ -6,11 +6,13 @@ using System.Text.RegularExpressions;
 using Backups.FileSystem;
 using Backups.FileSystem.Impl;
 using Backups.Tools.FSAdapterException;
+using Newtonsoft.Json;
 
 namespace Backups.FSAdapter.Impl
 {
     public class VirtualFsAdapter : IFsAdapter
     {
+        [JsonProperty]
         private readonly VirtualFileSystem _fileSystem;
 
         public VirtualFsAdapter()
@@ -95,15 +97,12 @@ namespace Backups.FSAdapter.Impl
             CheckPath(dirPath);
 
             IArchive archive = GetArchive(archivePath);
-            IDirectory parentDir = GetParentDir(dirPath);
+            IDirectory directory = GetDirectory(dirPath);
 
-            IDirectory directory = new Directory(dirPath[(dirPath.LastIndexOf('\\') + 1) ..]);
             foreach (IFile file in archive.Objects())
             {
                 directory.AddObject(file);
             }
-
-            parentDir.AddObject(directory);
         }
 
         private void CheckPath(string path)

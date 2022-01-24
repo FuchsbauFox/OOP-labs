@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Backups.Algorithm;
 
 namespace Backups.Backups
 {
@@ -7,7 +8,7 @@ namespace Backups.Backups
     {
         DateTime Time { get; }
         string Name { get; }
-        string Algorithm { get; }
+        IAlgorithmStorage Algorithm { get; }
         IReadOnlyList<string> Jobs();
     }
 }

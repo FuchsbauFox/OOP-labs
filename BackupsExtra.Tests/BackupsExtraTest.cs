@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Backups.Algorithm.Impl;
 using Backups.Backups;
 using Backups.FSAdapter;
 using Backups.FSAdapter.Impl;
 using Backups.MyDateTime;
 using BackupsExtra.BackupsExtra.Impl;
+using BackupsExtra.Strategies;
 using BackupsExtra.Strategies.Impl;
 using NUnit.Framework;
 namespace BackupsExtra.Tests
@@ -12,14 +15,12 @@ namespace BackupsExtra.Tests
     public class Tests
     {
         private IFsAdapter _adapter;
-        private VirtualFsAdapter _virtualFsAdapter;
         private Backup _backup;
 
         [SetUp]
         public void Setup()
         {
-            _virtualFsAdapter = new VirtualFsAdapter();
-            _adapter = _virtualFsAdapter;
+            _adapter = new VirtualFsAdapter();
             _adapter.AddDirectory(@"C:\programming");
             _adapter.AddDirectory(@"C:\programming\OOP");
             _adapter.AddDirectory(@"C:\programming\Algorithm");
@@ -42,8 +43,8 @@ namespace BackupsExtra.Tests
         [Test]
         public void CheckCleaningAlgorithm_ByDateOfCreation()
         {
-            _backup = new Backup(_adapter, new ByDateOfCreation(10, 0, 0), "console");
-            _backup.SetAlgorithmStorage("split");
+            _backup = new Backup(_adapter, new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)));
+            _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-2.txt");
@@ -62,8 +63,8 @@ namespace BackupsExtra.Tests
         [Test]
         public void CheckCleaningAlgorithm_ByNumberOfPoints()
         {
-            _backup = new Backup(_adapter, new ByNumberOfPoints(2), "console");
-            _backup.SetAlgorithmStorage("split");
+            _backup = new Backup(_adapter, new ByNumberOfPoints(2));
+            _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-2.txt");
@@ -83,10 +84,16 @@ namespace BackupsExtra.Tests
         }
 
         [Test]
-        public void CheckCleaningAlgorithm_HybridDateAndNumber()
+        public void CheckCleaningAlgorithm_HybridIfAll()
         {
-            _backup = new Backup(_adapter, new HybridDateAndNumber(2, 10, 0, 0), "console");
-            _backup.SetAlgorithmStorage("split");
+            _backup = new Backup(_adapter,
+                new HybridIfAll(new List<ICleaningStrategy>()
+                {
+                    new ByNumberOfPoints(2),
+                    new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)),
+                }));
+            
+            _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-2.txt");
@@ -107,10 +114,16 @@ namespace BackupsExtra.Tests
         }
 
         [Test]
-        public void CheckCleaningAlgorithm_HybridDateOrNumber()
+        public void CheckCleaningAlgorithm_HybridIfAtLeastOne()
         {
-            _backup = new Backup(_adapter, new HybridDateOrNumber(2, 10, 0, 0), "console");
-            _backup.SetAlgorithmStorage("split");
+            _backup = new Backup(_adapter,
+                new HybridIfAtLeastOne(new List<ICleaningStrategy>()
+                {
+                    new ByNumberOfPoints(2),
+                    new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)),
+                }));
+            
+            _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-2.txt");
@@ -129,8 +142,8 @@ namespace BackupsExtra.Tests
         [Test]
         public void MergeRestorePoints()
         {
-            _backup = new Backup(_adapter, new HybridDateOrNumber(2, 10, 0, 0), "console");
-            _backup.SetAlgorithmStorage("split");
+            _backup = new Backup(_adapter, new ByNumberOfPoints(10));
+            _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
             _backup.CreateBackup("Restore1");

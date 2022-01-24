@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Backups.Algorithm;
 using Backups.Backups;
 using Backups.FSAdapter;
 using BackupsExtra.Enrichers;
@@ -10,25 +11,18 @@ namespace BackupsExtra.BackupsExtra.Impl
 {
     public class Backup : IBackup, IBackupExtra
     {
-        public Backup(IFsAdapter adapter, ICleaningStrategy strategy, string loggerType)
+        public Backup(IFsAdapter adapter, ICleaningStrategy strategy)
         {
             BackupJobExtra = new BackupJobExtra(adapter);
             Strategy = strategy;
-            Strategy.SetBackupJobExtra(BackupJobExtra);
 
-            Log.Logger = loggerType switch
-            {
-                "console" => new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
-                    .WriteTo.Console(
-                        outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{NewLine}{Exception}")
-                    .CreateLogger(),
-                "file" => new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
-                    .WriteTo.File(
-                        "log.txt",
-                        outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{NewLine}{Exception}")
-                    .CreateLogger(),
-                _ => Log.Logger
-            };
+            Log.Logger = new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                .WriteTo.Console(
+                    outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}")
+                .WriteTo.File(
+                    "log.txt",
+                    outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}")
+                .CreateLogger();
         }
 
         [JsonProperty]
@@ -56,7 +50,7 @@ namespace BackupsExtra.BackupsExtra.Impl
                 BackupJobExtra.Objects());
         }
 
-        public void SetAlgorithmStorage(string algorithm)
+        public void SetAlgorithmStorage(IAlgorithmStorage algorithm)
         {
             BackupJobExtra.SetAlgorithmStorage(algorithm);
 
@@ -70,7 +64,8 @@ namespace BackupsExtra.BackupsExtra.Impl
                 "Create RestorePoint: {@RestorePoint}\n\tList JobObjects: {JobObjects}",
                 BackupJobExtra.Points().Last(),
                 BackupJobExtra.Points().Last().Jobs());
-            Strategy.CheckingAndCleaningPoints();
+
+            Strategy.CleaningPoints(BackupJobExtra);
             Log.Information(
                 "Non-removed points: {@RestorePoints}",
                 BackupJobExtra.Points());

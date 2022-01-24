@@ -25,7 +25,7 @@ namespace Backups.FileSystem.Impl
 
         public void AddObject(IStorageObject obj)
         {
-            CheckExistsObject(obj.Name);
+            CheckExistsObject(obj);
             _objects.Add(obj);
         }
 
@@ -45,9 +45,9 @@ namespace Backups.FileSystem.Impl
             }
         }
 
-        private void CheckExistsObject(string name)
+        private void CheckExistsObject(IStorageObject newObject)
         {
-            if (_objects.Any(obj => obj.Name == name))
+            if (_objects.Any(obj => obj.Name == newObject.Name && obj.GetType() == newObject.GetType()))
             {
                 throw new ObjectWithThisNameAlreadyExistsException();
             }

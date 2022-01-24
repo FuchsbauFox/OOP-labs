@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Backups.Algorithm.Impl;
 using Backups.Backups;
 using Backups.FSAdapter;
 using Backups.FSAdapter.Impl;
@@ -55,11 +56,10 @@ namespace Backups.Tests
             };
             Assert.AreEqual(objects, _backupJob.Objects().ToList());
 
-            _backupJob.SetAlgorithmStorage("single");
+            _backupJob.SetAlgorithmStorage(new SingleStorage());
             _backupJob.CreateBackup("RestorePoint1");
             
             Assert.AreEqual(1, _backupJob.Points().Count);
-            Assert.AreEqual("single", _backupJob.Points().ToList()[0].Algorithm);
             Assert.AreEqual(objects, _backupJob.Points().ToList()[0].Jobs().ToList());
             
             
@@ -70,11 +70,10 @@ namespace Backups.Tests
             objects.Remove(@"C:\programming\OOP\lab-1.txt");
             Assert.AreEqual(objects, _backupJob.Objects().ToList());
 
-            _backupJob.SetAlgorithmStorage("split");
+            _backupJob.SetAlgorithmStorage(new SplitStorage());
             _backupJob.CreateBackup("RestorePoint2");
             
             Assert.AreEqual(2, _backupJob.Points().Count);
-            Assert.AreEqual("split", _backupJob.Points().ToList()[1].Algorithm);
             Assert.AreEqual(objects, _backupJob.Points().ToList()[1].Jobs().ToList());
         }
         
@@ -95,11 +94,10 @@ namespace Backups.Tests
             };
             Assert.AreEqual(objects, _backupJob.Objects().ToList());
 
-            _backupJob.SetAlgorithmStorage("single");
+            _backupJob.SetAlgorithmStorage(new SingleStorage());
             _backupJob.CreateBackup("RestorePoint1");
             
             Assert.AreEqual(1, _backupJob.Points().Count);
-            Assert.AreEqual("single", _backupJob.Points().ToList()[0].Algorithm);
             Assert.AreEqual(objects, _backupJob.Points().ToList()[0].Jobs().ToList());
             
             
@@ -110,11 +108,10 @@ namespace Backups.Tests
             objects.Remove(@"C:\programming\Algorithm\DFS.txt");
             Assert.AreEqual(objects, _backupJob.Objects().ToList());
 
-            _backupJob.SetAlgorithmStorage("split");
+            _backupJob.SetAlgorithmStorage(new SplitStorage());
             _backupJob.CreateBackup("RestorePoint2");
             
             Assert.AreEqual(2, _backupJob.Points().Count);
-            Assert.AreEqual("split", _backupJob.Points().ToList()[1].Algorithm);
             Assert.AreEqual(objects, _backupJob.Points().ToList()[1].Jobs().ToList());
         }
     }

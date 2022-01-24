@@ -10,7 +10,7 @@ namespace Backups.MyDateTime
 
         private CurrentDate()
         {
-            Date = DateTime.Today;
+            Date = DateTime.Now;
         }
 
         public DateTime Date { get; private set; }

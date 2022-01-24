@@ -11,6 +11,9 @@ namespace Backups.FSAdapter
         void CopyFile(string sourceFileName, string destFileName);
         void AddContentOnFile(string path, string content);
         void CreateArchive(string dirName, string archiveName, List<string> filePaths, bool dirCanBeExist = false);
-        void ExtractArchive(string archivePath, string dirPath);
+        void ExtractArchive(string archiveName, string dirPath);
+        List<string> ExtractArchiveToTemp(string archiveName);
+        void DeleteArchive(string archiveName);
+        void MergeArchiveDir(string oldDirName, string newDirName, string oldArchive, string newArchive);
     }
 }

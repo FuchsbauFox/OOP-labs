@@ -44,14 +44,9 @@ namespace Backups.Backups.Impl
             JobObjects.Remove(path);
         }
 
-        public void SetAlgorithmStorage(string algorithm)
+        public void SetAlgorithmStorage(IAlgorithmStorage algorithm)
         {
-            AlgorithmStorage = algorithm switch
-            {
-                "split" => new SplitStorage(Adapter),
-                "single" => new SingleStorage(Adapter),
-                _ => throw new AlgorithmNotFoundException()
-            };
+            AlgorithmStorage = algorithm;
         }
 
         public void CreateBackup(string name)
@@ -59,7 +54,7 @@ namespace Backups.Backups.Impl
             CheckAlgorithm();
             CheckRestorePoint(name);
 
-            RestorePoints.Add(AlgorithmStorage.CreateRestorePoint(name, JobObjects));
+            RestorePoints.Add(AlgorithmStorage.CreateRestorePoint(Adapter, name, JobObjects));
         }
 
         private void CheckJobObject(string path, bool shouldExist = false)

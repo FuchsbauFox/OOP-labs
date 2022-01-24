@@ -91,18 +91,52 @@ namespace Backups.FSAdapter.Impl
             }
         }
 
-        public void ExtractArchive(string archivePath, string dirPath)
+        public void ExtractArchive(string archiveName, string dirPath)
         {
-            CheckPath(archivePath);
             CheckPath(dirPath);
-
-            IArchive archive = GetArchive(archivePath);
             IDirectory directory = GetDirectory(dirPath);
 
-            foreach (IFile file in archive.Objects())
+            foreach (IStorageObject storageObject in GetDirectory(archiveName).Objects())
             {
-                directory.AddObject(file);
+                if (storageObject is not IArchive archive)
+                    throw new StorageObjectNotFoundException();
+                foreach (IFile file in archive.Objects())
+                {
+                    directory.AddObject(file);
+                }
             }
+        }
+
+        public List<string> ExtractArchiveToTemp(string archiveName)
+        {
+            DeleteTempDir();
+            AddDirectory("C:\\Temp");
+            IDirectory directory = GetDirectory("C:\\Temp");
+
+            var paths = new List<string>();
+            foreach (IStorageObject storageObject in GetDirectory("C:\\Backups\\" + archiveName).Objects())
+            {
+                if (storageObject is not IArchive archive)
+                    throw new StorageObjectNotFoundException();
+                foreach (IFile file in archive.Objects())
+                {
+                    directory.AddObject(file);
+                    paths.Add("C:\\Temp\\" + file.Name);
+                }
+            }
+
+            return paths;
+        }
+
+        public void DeleteArchive(string archiveName)
+        {
+            DeleteDirectory("C:\\Backups\\" + archiveName);
+        }
+
+        public void MergeArchiveDir(string oldDirName, string newDirName, string oldArchive, string newArchive)
+        {
+            List<string> jobObject = ExtractArchiveToTemp(oldDirName[(oldDirName.LastIndexOf("\\", StringComparison.Ordinal) + 1) ..]);
+            CreateArchive(newDirName, newArchive, jobObject, true);
         }
 
         private void CheckPath(string path)
@@ -192,6 +226,18 @@ namespace Backups.FSAdapter.Impl
             parentDir.AddObject(directory);
 
             return directory;
+        }
+
+        private void DeleteTempDir()
+        {
+            try
+            {
+                DeleteDirectory("C:\\Temp");
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
     }
 }

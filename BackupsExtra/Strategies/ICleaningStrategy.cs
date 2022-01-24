@@ -1,10 +1,12 @@
-﻿using BackupsExtra.BackupsExtra.Impl;
+﻿using System.Collections.Generic;
+using Backups.Backups;
+using BackupsExtra.BackupsExtra.Impl;
 
 namespace BackupsExtra.Strategies
 {
     public interface ICleaningStrategy
     {
-        void SetBackupJobExtra(BackupJobExtra backupJobExtra);
-        void CheckingAndCleaningPoints();
+        void CleaningPoints(BackupJobExtra backupJobExtra);
+        List<IRestorePoint> GetListPointsToRemove(BackupJobExtra backupJobExtra);
     }
 }

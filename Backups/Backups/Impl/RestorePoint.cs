@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Backups.Algorithm;
 using Backups.MyDateTime;
 using Newtonsoft.Json;
 
@@ -7,7 +8,7 @@ namespace Backups.Backups.Impl
 {
     public class RestorePoint : IRestorePoint
     {
-        public RestorePoint(string name, string algorithm, List<string> backupJobs)
+        public RestorePoint(string name, IAlgorithmStorage algorithm, List<string> backupJobs)
         {
             CheckName(name);
 
@@ -19,7 +20,7 @@ namespace Backups.Backups.Impl
 
         public DateTime Time { get; }
         public string Name { get; }
-        public string Algorithm { get; }
+        public IAlgorithmStorage Algorithm { get; }
         [JsonProperty]
         protected List<string> BackupJobs { get; }
         public IReadOnlyList<string> Jobs() => BackupJobs;

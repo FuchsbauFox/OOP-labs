@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Backups.Backups;
 using BackupsExtra.BackupsExtra.Impl;
 using Newtonsoft.Json;
 
@@ -11,30 +13,27 @@ namespace BackupsExtra.Strategies.Impl
         {
             CheckNumber(number);
             Number = number;
-            BackupJobExtra = null;
         }
 
         [JsonProperty]
         protected int Number { get; }
-        [JsonProperty]
-        private BackupJobExtra BackupJobExtra { get; set; }
 
-        public void SetBackupJobExtra(BackupJobExtra backupJobExtra)
+        public void CleaningPoints(BackupJobExtra backupJobExtra)
         {
-            BackupJobExtra = backupJobExtra;
-        }
-
-        public void CheckingAndCleaningPoints()
-        {
-            while (BackupJobExtra.Points().Count > Number)
+            foreach (IRestorePoint point in GetListPointsToRemove(backupJobExtra))
             {
-                BackupJobExtra.DeleteRestorePoint(BackupJobExtra.Points().First().Name);
+                backupJobExtra.DeleteRestorePoint(point.Name);
             }
         }
 
-        private void CheckNumber(int argument)
+        public List<IRestorePoint> GetListPointsToRemove(BackupJobExtra backupJobExtra)
         {
-            if (argument <= 0)
+            return backupJobExtra.Points().Take(backupJobExtra.Points().Count - Number).ToList();
+        }
+
+        private void CheckNumber(int number)
+        {
+            if (number <= 0)
                 throw new ArgumentException();
         }
     }

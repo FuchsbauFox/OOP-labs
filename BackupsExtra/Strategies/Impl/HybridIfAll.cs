@@ -2,22 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using Backups.Backups;
-using Backups.MyDateTime;
 using BackupsExtra.BackupsExtra.Impl;
 using BackupsExtra.Tools.BackupsExtra;
 using Newtonsoft.Json;
 
 namespace BackupsExtra.Strategies.Impl
 {
-    public class ByDateOfCreation : ICleaningStrategy
+    public class HybridIfAll : ICleaningStrategy
     {
         [JsonProperty]
-        private TimeSpan _timeSpan;
+        private List<ICleaningStrategy> _strategies;
 
-        public ByDateOfCreation(TimeSpan timeSpan)
+        public HybridIfAll(List<ICleaningStrategy> strategies)
         {
-            CheckData(timeSpan);
-            _timeSpan = timeSpan;
+            CheckStrategies(strategies);
+            _strategies = strategies;
         }
 
         public void CleaningPoints(BackupJobExtra backupJobExtra)
@@ -33,18 +32,22 @@ namespace BackupsExtra.Strategies.Impl
 
         public List<IRestorePoint> GetListPointsToRemove(BackupJobExtra backupJobExtra)
         {
-            return backupJobExtra.Points()
-                .Select(point => point)
-                .Where(point => CurrentDate.GetInstance().Date > point.Time + _timeSpan)
-                .Select(point => point).ToList();
+            List<IRestorePoint> pointsToRemove = _strategies.First().GetListPointsToRemove(backupJobExtra);
+            foreach (List<IRestorePoint> temp in _strategies
+                .Select(strategy => pointsToRemove
+                    .Where(pointToRemove => strategy.GetListPointsToRemove(backupJobExtra)
+                        .Any(point => point == pointToRemove)).ToList()))
+            {
+                pointsToRemove = temp;
+            }
+
+            return pointsToRemove;
         }
 
-        private void CheckData(TimeSpan timeSpan)
+        private void CheckStrategies(List<ICleaningStrategy> strategies)
         {
-            if (timeSpan == null)
+            if (strategies == null)
                 throw new ArgumentNullException();
-            if (timeSpan.Ticks <= 0)
-                throw new ArgumentException();
         }
     }
 }

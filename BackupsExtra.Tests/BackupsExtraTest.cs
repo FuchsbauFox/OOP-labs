@@ -7,9 +7,12 @@ using Backups.FSAdapter;
 using Backups.FSAdapter.Impl;
 using Backups.MyDateTime;
 using BackupsExtra.BackupsExtra.Impl;
+using BackupsExtra.Enrichers;
 using BackupsExtra.Strategies;
 using BackupsExtra.Strategies.Impl;
 using NUnit.Framework;
+using Serilog;
+
 namespace BackupsExtra.Tests
 {
     public class Tests
@@ -43,7 +46,9 @@ namespace BackupsExtra.Tests
         [Test]
         public void CheckCleaningAlgorithm_ByDateOfCreation()
         {
-            _backup = new Backup(_adapter, new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)));
+            _backup = new Backup(_adapter, new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)), 
+                new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}"));
             _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
@@ -63,7 +68,9 @@ namespace BackupsExtra.Tests
         [Test]
         public void CheckCleaningAlgorithm_ByNumberOfPoints()
         {
-            _backup = new Backup(_adapter, new ByNumberOfPoints(2));
+            _backup = new Backup(_adapter, new ByNumberOfPoints(2), 
+                new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}"));
             _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");
@@ -87,11 +94,14 @@ namespace BackupsExtra.Tests
         public void CheckCleaningAlgorithm_HybridIfAll()
         {
             _backup = new Backup(_adapter,
-                new HybridIfAll(new List<ICleaningStrategy>()
+                new HybridIfAll(new List<CleaningStrategy>()
                 {
                     new ByNumberOfPoints(2),
                     new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)),
-                }));
+                }), 
+                new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                    .WriteTo.Console(
+                        outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}"));
             
             _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
@@ -117,11 +127,14 @@ namespace BackupsExtra.Tests
         public void CheckCleaningAlgorithm_HybridIfAtLeastOne()
         {
             _backup = new Backup(_adapter,
-                new HybridIfAtLeastOne(new List<ICleaningStrategy>()
+                new HybridIfAtLeastOne(new List<CleaningStrategy>()
                 {
                     new ByNumberOfPoints(2),
                     new ByDateOfCreation(new TimeSpan(10, 0, 0, 0)),
-                }));
+                }),
+                new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                    .WriteTo.Console(
+                        outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}"));
             
             _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
@@ -142,7 +155,10 @@ namespace BackupsExtra.Tests
         [Test]
         public void MergeRestorePoints()
         {
-            _backup = new Backup(_adapter, new ByNumberOfPoints(10));
+            _backup = new Backup(_adapter, new ByNumberOfPoints(10),
+                new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
+                    .WriteTo.Console(
+                        outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}"));
             _backup.SetAlgorithmStorage(new SplitStorage());
             _backup.AddJobObject(@"C:\programming\OOP\lab-0.txt");
             _backup.AddJobObject(@"C:\programming\OOP\lab-1.txt");

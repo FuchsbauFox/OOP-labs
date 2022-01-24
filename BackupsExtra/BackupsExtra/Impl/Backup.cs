@@ -2,7 +2,6 @@
 using Backups.Algorithm;
 using Backups.Backups;
 using Backups.FSAdapter;
-using BackupsExtra.Enrichers;
 using BackupsExtra.Strategies;
 using Newtonsoft.Json;
 using Serilog;
@@ -11,24 +10,18 @@ namespace BackupsExtra.BackupsExtra.Impl
 {
     public class Backup : IBackup, IBackupExtra
     {
-        public Backup(IFsAdapter adapter, ICleaningStrategy strategy)
+        public Backup(IFsAdapter adapter, CleaningStrategy strategy, LoggerConfiguration loggerConfiguration)
         {
             BackupJobExtra = new BackupJobExtra(adapter);
             Strategy = strategy;
 
-            Log.Logger = new LoggerConfiguration().Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}")
-                .WriteTo.File(
-                    "log.txt",
-                    outputTemplate: "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}{NewLine}")
-                .CreateLogger();
+            Log.Logger = Log.Logger = loggerConfiguration.CreateLogger();
         }
 
         [JsonProperty]
         public BackupJobExtra BackupJobExtra { get; }
         [JsonProperty]
-        protected ICleaningStrategy Strategy { get; }
+        protected CleaningStrategy Strategy { get; }
 
         public void AddJobObject(string path)
         {

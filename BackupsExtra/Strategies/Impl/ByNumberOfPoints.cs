@@ -7,34 +7,21 @@ using Newtonsoft.Json;
 
 namespace BackupsExtra.Strategies.Impl
 {
-    public class ByNumberOfPoints : ICleaningStrategy
+    public class ByNumberOfPoints : CleaningStrategy
     {
         public ByNumberOfPoints(int number)
         {
-            CheckNumber(number);
+            if (number <= 0)
+                throw new ArgumentException();
             Number = number;
         }
 
         [JsonProperty]
         protected int Number { get; }
 
-        public void CleaningPoints(BackupJobExtra backupJobExtra)
-        {
-            foreach (IRestorePoint point in GetListPointsToRemove(backupJobExtra))
-            {
-                backupJobExtra.DeleteRestorePoint(point.Name);
-            }
-        }
-
-        public List<IRestorePoint> GetListPointsToRemove(BackupJobExtra backupJobExtra)
+        public override List<IRestorePoint> GetListPointsToRemove(BackupJobExtra backupJobExtra)
         {
             return backupJobExtra.Points().Take(backupJobExtra.Points().Count - Number).ToList();
-        }
-
-        private void CheckNumber(int number)
-        {
-            if (number <= 0)
-                throw new ArgumentException();
         }
     }
 }

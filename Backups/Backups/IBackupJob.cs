@@ -2,13 +2,9 @@
 
 namespace Backups.Backups
 {
-    public interface IBackupJob
+    public interface IBackupJob : IBackup
     {
-        IReadOnlyList<string> JobObjects();
-        IReadOnlyList<IRestorePoint> RestorePoints();
-        void AddJobObject(string path);
-        void RemoveJobObject(string path);
-        void SetAlgorithmStorage(string algorithm);
-        void CreateBackup(string name);
+        IReadOnlyList<string> Objects();
+        IReadOnlyList<IRestorePoint> Points();
     }
 }

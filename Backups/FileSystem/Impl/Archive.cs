@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Backups.Tools.FileSystemException;
+using Newtonsoft.Json;
 
 namespace Backups.FileSystem.Impl
 {
     public class Archive : IArchive
     {
+        [JsonProperty]
         private readonly List<IFile> _objects;
 
         public Archive(string name)

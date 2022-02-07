@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Backups.Tools.FileSystemException;
+using Newtonsoft.Json;
 
 namespace Backups.FileSystem.Impl
 {
     public class Directory : IDirectory
     {
+        [JsonProperty]
         private readonly List<IStorageObject> _objects;
 
         public Directory(string name, bool isRoot = false)
@@ -23,13 +25,13 @@ namespace Backups.FileSystem.Impl
 
         public void AddObject(IStorageObject obj)
         {
-            CheckExistsObject(obj.Name);
+            CheckExistsObject(obj);
             _objects.Add(obj);
         }
 
         public void DeleteObject(IStorageObject obj)
         {
-            CheckThisDirectoryForDelete();
+            CheckThisDirectoryForDelete(obj.Name);
 
             _objects.Remove(obj);
         }
@@ -43,17 +45,17 @@ namespace Backups.FileSystem.Impl
             }
         }
 
-        private void CheckExistsObject(string name)
+        private void CheckExistsObject(IStorageObject newObject)
         {
-            if (_objects.Any(obj => obj.Name == name))
+            if (_objects.Any(obj => obj.Name == newObject.Name && obj.GetType() == newObject.GetType()))
             {
                 throw new ObjectWithThisNameAlreadyExistsException();
             }
         }
 
-        private void CheckThisDirectoryForDelete()
+        private void CheckThisDirectoryForDelete(string name)
         {
-            if (Name == "C:" || Name == "Backups")
+            if (name is "C:" or "Backups")
             {
                 throw new ObjectCannotBeDeleteException();
             }

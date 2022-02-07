@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace Backups.FSAdapter.Impl
 {
@@ -42,6 +44,15 @@ namespace Backups.FSAdapter.Impl
 
         public void CreateArchive(string dirName, string archiveName, List<string> filePaths, bool dirCanBeExist = false)
         {
+            try
+            {
+                Directory.Delete("C:\\Temp", true);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
             string dirPath = "C:\\Temp";
             Directory.CreateDirectory(dirPath);
             foreach (string path in filePaths)
@@ -54,10 +65,46 @@ namespace Backups.FSAdapter.Impl
             Directory.Delete(dirPath, true);
         }
 
-        public void ExtractArchive(string archivePath, string dirPath)
+        public void ExtractArchive(string archiveName, string dirPath)
         {
             Directory.CreateDirectory(dirPath);
-            ZipFile.ExtractToDirectory(archivePath, dirPath);
+            foreach (string file in Directory.GetFiles("C:\\Backups\\" + archiveName))
+            {
+                ZipFile.ExtractToDirectory(file, dirPath);
+            }
+        }
+
+        public List<string> ExtractArchiveToTemp(string archiveName)
+        {
+            try
+            {
+                Directory.Delete("C:\\Temp", true);
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            Directory.CreateDirectory("C:\\Temp");
+            foreach (string file in Directory.GetFiles("C:\\Backups\\" + archiveName))
+            {
+                ZipFile.ExtractToDirectory(file, "C:\\Temp");
+            }
+
+            return Directory.GetFiles("C:\\Temp").Select(file =>
+                "C:\\Temp\\" + file[(file.LastIndexOf("\\", StringComparison.Ordinal) + 1) ..]).ToList();
+        }
+
+        public void DeleteArchive(string archiveName)
+        {
+            DeleteDirectory("C:\\Backups\\" + archiveName);
+        }
+
+        public void MergeArchiveDir(string oldDirName, string newDirName, string oldArchive, string newArchive)
+        {
+            CopyFile(
+                "C:\\Backups\\" + oldDirName + "\\" + oldArchive,
+                "C:\\Backups\\" + newDirName + "\\" + newArchive);
         }
     }
 }

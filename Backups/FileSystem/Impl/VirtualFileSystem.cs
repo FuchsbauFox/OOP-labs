@@ -1,7 +1,10 @@
-﻿namespace Backups.FileSystem.Impl
+﻿using Newtonsoft.Json;
+
+namespace Backups.FileSystem.Impl
 {
     public class VirtualFileSystem : IFileSystem
     {
+        [JsonProperty]
         private readonly Directory _root;
 
         public VirtualFileSystem()
